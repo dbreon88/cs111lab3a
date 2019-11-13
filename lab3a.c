@@ -18,6 +18,8 @@ ID: 905187210
 #include <errno.h>
 #include "ext2_fs.h"
 
+typedef struct ext2_inode inodeEntry;
+
 int is_block_used(int bno, char * bitmap);
 
 int main(int argc, char* argv[]){
@@ -137,6 +139,25 @@ int main(int argc, char* argv[]){
 	printf("IFREE,%u\n", i);
       }
     }
+
+
+
+    //inode entries
+    unsigned int inodeNum =0, owner =0, groupNum=0, linkCount =0, fileSize=0, numBlocksUsed =0;
+    inodeEntry* inodes = malloc(inodes_count*sizeof(inodeEntry));
+    for(i=1; i<inodes_count; i++){
+      bytesRead = pread(fileSystem, &inodes[i], sizeof(inodeEntry), firstInodesBlockNum*1024);
+    if(bytesRead<0){
+      char* errorDesc = strerror(errno);
+    fprintf(stderr, "Error reading from inode bitmap: %s\n",  errorDesc);
+    exit(1);
+    }  
+    //do the printing here start at index 1 
+    
+    
+    }
+    
+    
     
       exit(0);
 }//end main
