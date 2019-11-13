@@ -2,7 +2,7 @@
 #EMAIL: dbreon@ucla.edu
 #ID: 905187210
 
-main: lab3a.c
+main: clean lab3a.c
 	gcc -o lab3a lab3a.c -Wall -g -Wextra -pedantic
 clean:
 	rm -f lab3a lab3a-905187210.tar.gz

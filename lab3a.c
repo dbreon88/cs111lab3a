@@ -18,7 +18,7 @@ ID: 905187210
 #include <errno.h>
 #include "ext2_fs.h"
 
-
+int is_block_used(int bno, char * bitmap);
 
 int main(int argc, char* argv[]){
   if(argc != 2){ 
@@ -85,12 +85,41 @@ int main(int argc, char* argv[]){
     InodeMapNum = group.bg_inode_bitmap;
     firstInodesBlockNum = group.bg_inode_table;
     printf("GROUP,0,%u,%u,%u,%u,%u,%u,%u\n", blocks_count, inodesPerGrp, numFreeB,numFreeInodes,blockMapNum,InodeMapNum,firstInodesBlockNum); 
-
-    
-
-
-
     
     
+    //free block entries (blocks_count = number of blocks)
+
+    char* blockBitmap = malloc((blocks_count/8)*sizeof(char));
+    if(blockBitmap == NULL){
+ char* errorDesc = strerror(errno);
+  fprintf(stderr, "Error allocating space for block bitmap: %s\n",  errorDesc);
+    exit(1);
+    }
+    
+    bytesRead = pread(fileSystem, blockBitmap, (blocks_count/8), blockMapNum*1024);
+    if(bytesRead<0){
+      char* errorDesc = strerror(errno);
+    fprintf(stderr, "Error reading from block bitmap: %s\n",  errorDesc);
+    exit(1);
+    }
+    
+    unsigned int i;
+    for(i=0; i<blocks_count; i++){
+      if(!is_block_used(i, blockBitmap)){
+	printf("BFREE,%u\n", i);
+      }
+    }
       exit(0);
 }//end main
+
+int is_block_used(int bno, char * bitmap)
+{
+	int index = 0, offset = 0; 
+	if (bno == 0){  	
+	  return 1;
+	}
+	index = (bno-1)/8;
+	offset = (bno-1)%8;
+	return bitmap[index] & (1 << offset);
+}
+
