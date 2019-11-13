@@ -149,7 +149,6 @@ int is_block_used(int bno, char * bitmap)
 	}
 	index = (bno-1)/8;
 	offset = (bno-1)%8;
-	printf("checking index: %d and offset: %d\n", index, offset);
 	return bitmap[index] & (1 << offset);
 }
 
