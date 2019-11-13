@@ -104,11 +104,40 @@ int main(int argc, char* argv[]){
     }
     
     unsigned int i;
-    for(i=0; i<blocks_count; i++){
+    for(i=0; i<blocks_count+1; i++){
       if(!is_block_used(i, blockBitmap)){
 	printf("BFREE,%u\n", i);
       }
     }
+
+
+    //free inode entries
+
+      char* inodeBitmap = malloc((inodesPerGrp/8)*sizeof(char));
+    if(inodeBitmap == NULL){
+ char* errorDesc = strerror(errno);
+  fprintf(stderr, "Error allocating space for inode bitmap: %s\n",  errorDesc);
+    exit(1);
+    }
+    
+    bytesRead = pread(fileSystem, inodeBitmap, (inodesPerGrp/8), InodeMapNum*1024);
+    if(bytesRead<0){
+      char* errorDesc = strerror(errno);
+    fprintf(stderr, "Error reading from inode bitmap: %s\n",  errorDesc);
+    exit(1);
+    }
+    else if(((unsigned int)bytesRead) < (inodesPerGrp/8)){
+      fprintf(stderr, "Error: could not successfully read all bytes from inode bitmap");
+      exit(1);
+    }
+
+   
+    for(i=0; i<inodesPerGrp+1; i++){
+      if(!is_block_used(i, inodeBitmap)){
+	printf("IFREE,%u\n", i);
+      }
+    }
+    
       exit(0);
 }//end main
 
@@ -120,6 +149,7 @@ int is_block_used(int bno, char * bitmap)
 	}
 	index = (bno-1)/8;
 	offset = (bno-1)%8;
+	printf("checking index: %d and offset: %d\n", index, offset);
 	return bitmap[index] & (1 << offset);
 }
 
